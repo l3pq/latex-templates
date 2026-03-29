@@ -1,0 +1,231 @@
+% =============================================================================
+% cv-template.sty -- CV template (LaTeX)
+% Layout: banner + two columns (sidebar | main content)
+% Usage: \usepackage{cv-template} in the preamble, then \cv... commands in the document
+% =============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cv-template}[2025/03/14 CV Template]
+
+% -----------------------------------------------------------------------------
+% Dependencies
+% -----------------------------------------------------------------------------
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}  % Latin Modern -- correct Polish diacritics (Ę, Ś, Ą, Ź, etc.) in sans-serif
+\RequirePackage[top=0.6cm,bottom=1.05cm,left=1.2cm,right=1.2cm]{geometry}
+\RequirePackage{parskip}
+\linespread{0.92}\selectfont
+\RequirePackage{enumitem}
+\RequirePackage{hyperref}
+\RequirePackage{tikz}
+\RequirePackage{fancyhdr}
+\RequirePackage{titlesec}
+\RequirePackage{xcolor}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{fontawesome5}
+\RequirePackage{amssymb}
+\RequirePackage{paracol}
+
+% -----------------------------------------------------------------------------
+% Package options (e.g. \usepackage[accent=blue]{cv-template})
+% -----------------------------------------------------------------------------
+\newcommand{\cv@accent}{15,76,92}        % default teal
+\newcommand{\cv@accentlight}{230,245,247}
+\DeclareOption{accent=teal}{\renewcommand{\cv@accent}{15,76,92}\renewcommand{\cv@accentlight}{230,245,247}}
+\DeclareOption{accent=blue}{\renewcommand{\cv@accent}{30,60,114}\renewcommand{\cv@accentlight}{235,240,250}}
+\DeclareOption{accent=green}{\renewcommand{\cv@accent}{20,90,70}\renewcommand{\cv@accentlight}{238,248,242}}
+\ProcessOptions\relax
+
+% -----------------------------------------------------------------------------
+% Font and colors (Latin Modern Sans = full Polish character support)
+% -----------------------------------------------------------------------------
+\renewcommand{\sfdefault}{lmss}
+\renewcommand{\familydefault}{\sfdefault}
+
+\definecolor{cv@accent}{RGB}{\cv@accent}
+\definecolor{cv@accentlight}{RGB}{\cv@accentlight}
+\definecolor{cv@textmuted}{RGB}{80,80,80}
+\definecolor{cv@sectiongray}{RGB}{45,55,65}
+
+% -----------------------------------------------------------------------------
+% Personal data macros (set these in the document)
+% -----------------------------------------------------------------------------
+\newcommand{\cv@name}{}
+\newcommand{\cv@title}{}
+\newcommand{\cvname}[1]{\renewcommand{\cv@name}{#1}}
+\newcommand{\cvtitle}[1]{\renewcommand{\cv@title}{#1}}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=cv@accent,
+  urlcolor=cv@accent,
+}
+\AtBeginDocument{%
+  \hypersetup{pdfauthor={\cv@name}, pdftitle={CV \cv@name\ -- \cv@title}}%
+}
+
+% -----------------------------------------------------------------------------
+% Page (footer) -- bottom margin and footskip so the name is not clipped
+% -----------------------------------------------------------------------------
+\setlength{\footskip}{15pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[L]{\raisebox{4pt}{\small\color{cv@textmuted} \cv@name}}
+\fancyfoot[R]{\small\color{cv@textmuted} \thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% -----------------------------------------------------------------------------
+% Sections in the main column (title only, no rule)
+% -----------------------------------------------------------------------------
+\titleformat{\section}
+  {\normalfont\normalsize\bfseries\color{cv@sectiongray}}
+  {}
+  {0pt}
+  {}
+  [\vspace{0.05em}]
+
+\titlespacing*{\section}{0pt}{0.45em}{0.22em}
+
+% -----------------------------------------------------------------------------
+% Sidebar section (smaller, with a rule)
+% -----------------------------------------------------------------------------
+% Without \uppercase -- LaTeX's \uppercase does not handle Polish letters (ę→Ę, ś→Ś).
+\newcommand{\cvsidebarsection}[1]{%
+  \vspace{0.45em}%
+  {\normalfont\small\color{cv@accent}#1}\\[0.2em]%
+  {\color{cv@accent}\rule{\linewidth}{0.4pt}}\\[0.25em]%
+}
+
+% -----------------------------------------------------------------------------
+% Top banner (name + role)
+% -----------------------------------------------------------------------------
+\newcommand{\makecvheader}{%
+  \noindent
+  \tikz{\fill[cv@accent] (0,0) rectangle (\linewidth, 1.85cm);}%
+  \vspace{-1.85cm}%
+  \par\vspace{0.28cm}%
+  \noindent
+  {\fontsize{17}{21}\selectfont\bfseries\color{white} \cv@name}\\[0.06em]%
+  {\normalsize\color{white!92} \cv@title}%
+  \vspace{0.26cm}%
+  \nopagebreak[4]%  % keep banner and paracol on one page (avoids an empty first page)
+}
+
+% -----------------------------------------------------------------------------
+% Two-column layout (paracol): sidebar | main content, may break across two pages
+% Columns may break -- page 1: banner + start of body, page 2: continuation.
+% -----------------------------------------------------------------------------
+\newlength{\cv@sidebarwidth}
+\setlength{\cv@sidebarwidth}{4.15cm}
+\newlength{\cv@colsep}
+\setlength{\cv@colsep}{0.85cm}
+\newlength{\cv@mainwidth}
+
+\newcommand{\cvsidebarstart}{%
+  \setlength{\cv@mainwidth}{\dimexpr\textwidth-\cv@sidebarwidth-\cv@colsep\relax}%
+  \setlength{\columnsep}{\cv@colsep}%
+  \setcolumnwidth{\the\cv@sidebarwidth}[\the\cv@mainwidth]%
+  \leavevmode\noindent
+  \begin{paracol}{2}%
+  \raggedright
+  \small
+  \sloppy
+}
+
+\newcommand{\cvsidebarend}{%
+  \switchcolumn
+  \small
+}
+
+\newcommand{\cvbodyend}{%
+  \end{paracol}%
+}
+
+% -----------------------------------------------------------------------------
+% Contact block in the sidebar (icons + text)
+% -----------------------------------------------------------------------------
+\newcommand{\cvcontact}[5]{%
+  \cvsidebarsection{Kontakt}%
+  {\color{cv@accent}\faIcon{envelope}}\hspace{0.4em}\href{mailto:#1}{\footnotesize #1}\\[0.4em]%
+  {\color{cv@accent}\faIcon{phone}}\hspace{0.4em}#2\\[0.4em]%
+  {\color{cv@accent}\faIcon{linkedin}}\hspace{0.4em}\href{#3}{#4}\\[0.4em]%
+  {\color{cv@accent}\faIcon{map-marker-alt}}\hspace{0.4em}#5%
+}
+
+% -----------------------------------------------------------------------------
+% Skill group in the sidebar: \cvskills{Group name}{comma-separated list}
+% -----------------------------------------------------------------------------
+\newcommand{\cvskills}[2]{%
+  {\normalfont\small\color{cv@sectiongray}#1:}\\%
+  \vspace{0.1em}#2\\[0.4em]%
+}
+
+% -----------------------------------------------------------------------------
+% Education in the sidebar: \cveducation{Institution}{Description / field}
+% -----------------------------------------------------------------------------
+\newcommand{\cveducation}[2]{%
+  {\normalfont\small\color{cv@sectiongray}#1}\\%
+  \vspace{0.12em}#2%
+}
+
+% -----------------------------------------------------------------------------
+% ``About me'' box in the main column
+% -----------------------------------------------------------------------------
+\newenvironment{cvabout}{%
+  \noindent
+  \begin{tcolorbox}[enhanced, boxrule=0pt, colback=cv@accentlight, arc=2pt, left=4pt, right=0pt, top=0pt, bottom=0pt]%
+  \small
+}{%
+  \end{tcolorbox}%
+  \vspace{0.1em}%
+}
+
+% -----------------------------------------------------------------------------
+% Experience block: one entry = one employer (clear hierarchy)
+% -----------------------------------------------------------------------------
+% List without bullets or indent -- body aligns with section titles
+\newenvironment{cvitem}{%
+  \par\vspace{0.00em}\noindent
+  \setlist[itemize]{leftmargin=0pt, topsep=0.12em, itemsep=0.08em, partopsep=0pt, label={}, itemindent=0pt}%
+}{%
+  \par\vspace{0.02em}%
+}
+
+% Optional vertical space between employers (no rule; use \cvitemsep in the body as needed)
+\newcommand{\cvitemsep}{\par\vspace{0.0em}}
+
+% Employer header: accent bar and background, role in accent color.
+\newcommand{\cvjob}[2]{%
+  \par\vspace{0.22em}%
+  \noindent
+  \begin{tcolorbox}[enhanced, boxrule=0pt, frame hidden, sharp corners,
+    colback=cv@accentlight, left=5pt, right=6pt, top=2pt, bottom=2pt,
+    borderline west={3pt}{0pt}{cv@accent}]%
+  {\color{cv@accent}\bfseries #1}\\[0.08em]%
+  {\color{cv@textmuted}\small #2}%
+  \end{tcolorbox}%
+  \vspace{-0.4\baselineskip}%
+}
+
+% Project title: marker (short accent-colored bar) + title in cv@sectiongray.
+\newcommand{\cvproject}[1]{%
+  \par\vspace{0.12em}%
+  \noindent{\color{cv@accent}\rule[0.25em]{3pt}{1.1ex}}\hspace{0.5em}%
+  \textbf{\color{cv@sectiongray}#1}\\[0.08em]%
+}
+
+% One line of project description -- no indent, subtle vertical spacing between lines.
+\newcommand{\cvprojectline}[1]{\noindent#1\par\vspace{0.04em}}
+
+% Tech stack -- smaller, muted; thin line separating it from the description.
+\newcommand{\cvstack}[1]{%
+  \par\vspace{0.06em}%
+  \noindent{\color{cv@textmuted}\rule[0.5ex]{1.5em}{0.4pt}}\hspace{0.4em}%
+  {\footnotesize\color{cv@textmuted}\textit{Stack:} #1}\par
+}
+
+% Short extra note (e.g. ``Additionally: ...'') -- no trailing period, muted text
+\newcommand{\cvnote}[1]{\par\vspace{0.00em}\noindent{\small\color{cv@textmuted}#1}}
+
+\endinput

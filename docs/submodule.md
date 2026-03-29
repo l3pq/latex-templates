@@ -1,0 +1,53 @@
+# Using this repository as a git submodule
+
+Public repositories can hold **templates**, **Docker**, and **examples**; private repositories can add this project as a **submodule** and keep real CV or document sources out of the public tree.
+
+## Add the submodule
+
+From the root of your private repository:
+
+```bash
+git submodule add <URL-of-this-repo> latex-templates
+git submodule update --init --recursive
+```
+
+Use any directory name you prefer instead of `latex-templates`; the snippets below assume `latex-templates/`.
+
+## Layout
+
+- `latex-templates/` — submodule (this repo)
+- `cv.tex` (or `src/cv.tex`) — your document using `\usepackage{cv-template}`
+- `out/` — PDF output (add `out/` to `.gitignore` in the private repo)
+
+## `TEXINPUTS`
+
+LaTeX must find `cv-template.sty` inside the submodule’s `templates/` directory, not only the private repo root. Set:
+
+```text
+TEXINPUTS=./latex-templates/templates//:
+```
+
+The trailing `:` keeps the default TeX Live search paths.
+
+## Build the Docker image from the submodule
+
+```bash
+docker build -f latex-templates/docker/Dockerfile -t latex-templates-local latex-templates
+```
+
+## Compile with Docker (private repo root mounted at `/work`)
+
+```bash
+docker run --rm \
+  -v "$PWD:/work" \
+  -w /work \
+  -e TEXINPUTS=./latex-templates/templates//: \
+  latex-templates-local \
+  latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=out cv.tex
+```
+
+The PDF is written to `out/cv.pdf` when the main file is `cv.tex`.
+
+## Optional `just` wrapper in the private repo
+
+Point `root` at your private repo root and pass the same `TEXINPUTS` and `latex-templates/docker/Dockerfile` path when building the image.

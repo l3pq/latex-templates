@@ -1,0 +1,34 @@
+% Example document for the cv-template package (smoke test).
+\documentclass[10pt,a4paper]{article}
+\usepackage{cv-template}
+
+\begin{document}
+\cvname{Jane Doe}
+\cvtitle{Software Engineer}
+\makecvheader
+
+\begin{cvabout}
+Brief summary for the ``About me'' box.
+\end{cvabout}
+
+\cvsidebarstart
+\cvcontact{jane@example.com}{+1 000 000 0000}{https://www.linkedin.com/in/jane}{LinkedIn}{City, Country}
+\cveducation{Example University}{M.Sc.\ Computer Science}
+\cvskills{Languages}{English, Polish}
+\cvsidebarend
+
+\section{Experience}
+\cvjob{Example Corp}{2020 -- present}
+\begin{cvitem}
+\begin{itemize}
+\item Built reliable systems with clear documentation.
+\end{itemize}
+\end{cvitem}
+
+\section{Projects}
+\cvproject{Sample project}
+\cvprojectline{Short description of impact and responsibilities.}
+\cvstack{Python, PostgreSQL, Docker}
+
+\cvbodyend
+\end{document}
