@@ -1,0 +1,22 @@
+# Template index for this repository. Agents and tooling should use this as the
+# source of truth when bootstrapping consumer projects (submodule workflow).
+#
+# Paths below (sty_relative_path, example_relative_path) are relative to the
+# repository root of latex-templates.
+
+templates:
+  - id: cv
+    available: true
+    description: "CV / résumé (two-column layout, cv-template package)"
+    latex_package: cv-template
+    sty_relative_path: templates/cv-template.sty
+    example_relative_path: examples/cv-example.tex
+    suggested_entry_filename: main.tex
+
+  - id: official-letter
+    available: false
+    description: "Official / formal letter (planned — add .sty + example, then set available: true)"
+    latex_package: null
+    sty_relative_path: null
+    example_relative_path: null
+    suggested_entry_filename: main.tex

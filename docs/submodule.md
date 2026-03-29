@@ -2,6 +2,21 @@
 
 Public repositories can hold **templates**, **Docker**, and **examples**; private repositories can add this project as a **submodule** and keep real CV or document sources out of the public tree.
 
+## Quick bootstrap (AI agent or copy-paste)
+
+If you paste a link to this repo into an AI coding agent in an **empty folder**, it should follow **[AGENTS.md](../AGENTS.md)**:
+
+1. `git init` (if you want git + submodule).
+2. `git submodule add <URL> latex-templates` and `git submodule update --init --recursive`.
+3. Add `.gitignore` with `/out/`.
+4. Create `main.tex` at the project root (single document) or, for multiple documents, `docs/<name>/<unique>.tex` (e.g. `docs/cv/cv.tex`) — use **distinct basenames** so `latexmk -outdir=out` does not overwrite one `out/main.pdf` with another. Copy from the example path in [`templates/manifest.yml`](../templates/manifest.yml) for your template (`cv` today).
+5. Build with Docker using `TEXINPUTS=./latex-templates/templates//:` (see below).
+
+**Suggested layouts**
+
+- **Single document**: `main.tex` + `latex-templates/` submodule + `out/`.
+- **Multiple documents** (recommended for several CVs/letters in one private repo): one `latex-templates/` submodule at the root, multiple `docs/<topic>/main.tex` files.
+
 ## Add the submodule
 
 From the root of your private repository:
