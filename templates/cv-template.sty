@@ -145,8 +145,9 @@
 % -----------------------------------------------------------------------------
 % Contact block in the sidebar (icons + text)
 % -----------------------------------------------------------------------------
+\newcommand{\cvcontacttitle}{Kontakt}% override in English docs: {\renewcommand{\cvcontacttitle}{Contact}}
 \newcommand{\cvcontact}[5]{%
-  \cvsidebarsection{Kontakt}%
+  \cvsidebarsection{\cvcontacttitle}%
   {\color{cv@accent}\faIcon{envelope}}\hspace{0.4em}\href{mailto:#1}{\footnotesize #1}\\[0.4em]%
   {\color{cv@accent}\faIcon{phone}}\hspace{0.4em}#2\\[0.4em]%
   {\color{cv@accent}\faIcon{linkedin}}\hspace{0.4em}\href{#3}{#4}\\[0.4em]%
