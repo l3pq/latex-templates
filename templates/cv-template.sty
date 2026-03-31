@@ -172,11 +172,18 @@
 % -----------------------------------------------------------------------------
 % ``About me'' box in the main column
 % -----------------------------------------------------------------------------
+% Narrow main column: \hyphenpenalty inside tcolorbox can still hyphenate (e.g. com-plex, Data-dog).
+% babel's nohyphenation rules reliably disable word breaks in this box.
+% Ragged right avoids huge inter-word gaps from full justification; \frenchspacing
+% makes space after a sentence-ending period match a normal space (TeX default stretches it more).
 \newenvironment{cvabout}{%
   \noindent
-  \begin{tcolorbox}[enhanced, boxrule=0pt, colback=cv@accentlight, arc=2pt, left=4pt, right=0pt, top=0pt, bottom=0pt]%
+  \begin{tcolorbox}[enhanced, boxrule=0pt, colback=cv@accentlight, arc=2pt, left=4pt, right=0pt, top=0pt, bottom=0pt,
+    before upper={\frenchspacing\raggedright\sloppy}]%
+  \begin{hyphenrules}{nohyphenation}%
   \small
 }{%
+  \end{hyphenrules}%
   \end{tcolorbox}%
   \vspace{0.1em}%
 }
