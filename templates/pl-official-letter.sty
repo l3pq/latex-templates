@@ -1,11 +1,11 @@
 % =============================================================================
 % pl-official-letter.sty -- Polish formal letter (official correspondence)
 % Usage: \usepackage{pl-official-letter}, set \plnadawca, \pladresat, ...
-%        then \makeletterhead, body, \makelettersignature
+%        then \makeletterhead, body, optional \pllettersection{...}, \makelettersignature
 % =============================================================================
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pl-official-letter}[2026/04/16 Polish official letter v1.4]
+\ProvidesPackage{pl-official-letter}[2026/04/16 Polish official letter v1.5]
 
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
@@ -168,6 +168,24 @@
   \fi
   \noindent\pl@zwrot\par
   \vspace{0.9em}%
+}
+
+% -----------------------------------------------------------------------------
+% In-body section headings (same look as subject title, but \large not \Large)
+% -----------------------------------------------------------------------------
+\newlength{\pl@sectionbefore}
+\setlength{\pl@sectionbefore}{1em}
+\newcommand{\pllettersectionbeforegap}[1]{\setlength{\pl@sectionbefore}{#1}}
+\newlength{\pl@sectionafter}
+\setlength{\pl@sectionafter}{0.75em}
+\newcommand{\pllettersectionaftergap}[1]{\setlength{\pl@sectionafter}{#1}}
+
+% Call after \makeletterhead; repeat for multiple sections. Body follows as normal paragraphs.
+\long\def\pllettersection#1{%
+  \par
+  \vspace{\pl@sectionbefore}%
+  {\centering\bfseries\large #1\par}%
+  \vspace{\pl@sectionafter}%
 }
 
 % -----------------------------------------------------------------------------
