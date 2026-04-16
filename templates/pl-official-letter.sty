@@ -1,0 +1,206 @@
+% =============================================================================
+% pl-official-letter.sty -- Polish formal letter (official correspondence)
+% Usage: \usepackage{pl-official-letter}, set \plnadawca, \pladresat, ...
+%        then \makeletterhead, body, \makelettersignature
+% =============================================================================
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pl-official-letter}[2026/04/16 Polish official letter v1.4]
+
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+% Babel 24+: language options like [polish] may be unavailable; import works on TeX Live.
+\RequirePackage{babel}
+\babelprovide[import,main]{polish}
+\RequirePackage[a4paper,left=25mm,right=20mm,top=22mm,bottom=24mm]{geometry}
+
+% microtype is in texlive-latex-recommended; skip gracefully if missing
+\IfFileExists{microtype.sty}{%
+  \RequirePackage[protrusion=true,expansion=true]{microtype}%
+}{}
+
+\RequirePackage{hyperref}
+\hypersetup{hidelinks,pdfencoding=auto}
+
+\frenchspacing
+\setlength{\parindent}{1.1em}
+\setlength{\parskip}{0pt plus 0.3pt}
+\pagestyle{empty}
+
+% -----------------------------------------------------------------------------
+% Internal storage
+% -----------------------------------------------------------------------------
+\long\def\pl@nadawca{}
+\long\def\pl@adresat{}
+\def\pl@miejscowosc{}
+\def\pl@data{}
+\def\pl@tytul{}
+\def\pl@sprawa{}
+\def\pl@zwrot{Szanowni Państwo,}
+\def\pl@zakonczenie{Z poważaniem}
+\def\pl@podpis{}
+\def\pl@funkcja{}
+\def\pl@podpispodpowiedz{}
+
+% -----------------------------------------------------------------------------
+% Public setters (\long only for nadawca / adresat — blank lines, long blocks)
+% -----------------------------------------------------------------------------
+\long\def\plnadawca#1{\long\def\pl@nadawca{#1}}
+\long\def\pladresat#1{\long\def\pl@adresat{#1}}
+\def\plmiejscowosc#1{\def\pl@miejscowosc{#1}}
+\def\pldata#1{\def\pl@data{#1}}
+\def\pltytul#1{\def\pl@tytul{#1}}
+\def\plsprawa#1{\def\pl@sprawa{#1}}
+\def\plzwrot#1{\def\pl@zwrot{#1}}
+\def\plzakonczenie#1{\def\pl@zakonczenie{#1}}
+\def\plpodpis#1{\def\pl@podpis{#1}}
+\def\plfunkcja#1{\def\pl@funkcja{#1}}
+\def\plpodpowiedzpodpisu#1{\def\pl@podpispodpowiedz{#1}}
+
+% Convenience: `\plmiejscodata` sets place + date; `\makeletterhead` formats the Polish date line.
+\def\plmiejscodata#1#2{\def\pl@miejscowosc{#1}\def\pl@data{#2}}
+
+% Vertical offset before sender (left column); place/date on the right stay higher on the page.
+\newlength{\pl@nadawcatopgap}
+\setlength{\pl@nadawcatopgap}{2.6em}
+\newcommand{\plnadawcatopgap}[1]{\setlength{\pl@nadawcatopgap}{#1}}
+
+% Space between end of address block and subject title
+\newlength{\pl@headtotitle}
+\setlength{\pl@headtotitle}{2.75em}
+\newcommand{\plheadtotitlespace}[1]{\setlength{\pl@headtotitle}{#1}}
+
+% Two-column address block (left = sender, right = date + recipient)
+\newlength{\pl@leftcolwidth}
+\setlength{\pl@leftcolwidth}{0.46\textwidth}
+\newcommand{\plleftcolwidth}[1]{\setlength{\pl@leftcolwidth}{#1}}
+\newlength{\pl@rightcolwidth}
+\setlength{\pl@rightcolwidth}{0.48\textwidth}
+\newcommand{\plrightcolwidth}[1]{\setlength{\pl@rightcolwidth}{#1}}
+
+% Extra gap for recipient below end of sender (right column)
+\newlength{\pl@sendertorecipient}
+\setlength{\pl@sendertorecipient}{0.35em}
+\newcommand{\plsendertorecipient}[1]{\setlength{\pl@sendertorecipient}{#1}}
+
+% Auxiliary boxes and lengths for stable stepped layout:
+% recipient starts at (end of sender + pl@sendertorecipient).
+\newsavebox{\pl@senderbox}
+\newsavebox{\pl@datebox}
+\newlength{\pl@senderheight}
+\newlength{\pl@dateheight}
+\newlength{\pl@datetorecipientgap}
+
+% -----------------------------------------------------------------------------
+% PDF metadata (call after title / author known, or rely on user \hypersetup)
+% -----------------------------------------------------------------------------
+\newcommand{\plpdftitle}[1]{\hypersetup{pdftitle={#1}}}
+\newcommand{\plpdfauthor}[1]{\hypersetup{pdfauthor={#1}}}
+
+% -----------------------------------------------------------------------------
+% Letter head in cascaded order:
+% 1) place+date (right, highest)
+% 2) sender (left, lower)
+% 3) recipient (right, lower still)
+% -----------------------------------------------------------------------------
+\newcommand{\makeletterhead}{%
+  \thispagestyle{empty}%
+  % 1) Measure sender and date block heights to place recipient start
+  %    below end of sender (with a small offset).
+  \sbox{\pl@senderbox}{%
+    \begin{minipage}[t]{\pl@leftcolwidth}%
+      \vspace{0pt}%
+      {\normalsize\raggedright
+        \pl@nadawca\par}%
+    \end{minipage}%
+  }%
+  \sbox{\pl@datebox}{%
+    \begin{minipage}[t]{\pl@rightcolwidth}%
+      \vspace{0pt}%
+      {\normalsize\raggedleft
+        \ifx\pl@miejscowosc\@empty
+          \ifx\pl@data\@empty\else
+            dnia \pl@data\ r.\par
+          \fi
+        \else
+          \pl@miejscowosc
+          \ifx\pl@data\@empty\else
+            , dnia \pl@data\ r.%
+          \fi
+          \par
+        \fi
+      }%
+    \end{minipage}%
+  }%
+  \setlength{\pl@senderheight}{\dimexpr\ht\pl@senderbox+\dp\pl@senderbox\relax}%
+  \setlength{\pl@dateheight}{\dimexpr\ht\pl@datebox+\dp\pl@datebox\relax}%
+  \setlength{\pl@datetorecipientgap}{%
+    \dimexpr \pl@nadawcatopgap + \pl@senderheight + \pl@sendertorecipient - \pl@dateheight\relax
+  }%
+  \ifdim\pl@datetorecipientgap<0pt
+    \setlength{\pl@datetorecipientgap}{0pt}%
+  \fi
+  %
+  % 2) Render the two-column address block
+  \noindent
+  \begin{minipage}[t]{\pl@leftcolwidth}
+    \vspace{0pt}%
+    \vspace{\pl@nadawcatopgap}%
+    \usebox{\pl@senderbox}\par
+  \end{minipage}%
+  \hfill
+  \begin{minipage}[t]{\pl@rightcolwidth}
+    \vspace{0pt}%
+    \usebox{\pl@datebox}\par
+    \vspace{\pl@datetorecipientgap}%
+    {\normalsize\raggedleft
+      \pl@adresat\par}%
+  \end{minipage}\par
+  \vspace{\pl@headtotitle}%
+  \ifx\pl@tytul\@empty\else
+    {\centering\bfseries\large\pl@tytul\par}%
+    \vspace{1.1em}%
+  \fi
+  \ifx\pl@sprawa\@empty\else
+    {\normalsize{\bfseries Dotyczy:} \pl@sprawa\par}%
+    \vspace{1em}%
+  \fi
+  \noindent\pl@zwrot\par
+  \vspace{0.9em}%
+}
+
+% -----------------------------------------------------------------------------
+% Closing + signature block (right-aligned, typical for private person)
+% -----------------------------------------------------------------------------
+\newlength{\pl@signwidth}
+\setlength{\pl@signwidth}{6.2cm}
+\newlength{\pl@signtolinegap}
+\setlength{\pl@signtolinegap}{2.7em}
+\newcommand{\plsigntolinegap}[1]{\setlength{\pl@signtolinegap}{#1}}
+\newlength{\pl@linetonamegap}
+\setlength{\pl@linetonamegap}{0.95em}
+\newcommand{\pllinetonamegap}[1]{\setlength{\pl@linetonamegap}{#1}}
+
+\newcommand{\makelettersignature}{%
+  \par\vspace{1.6em}%
+  \noindent
+  \begin{minipage}{\textwidth}
+    \raggedleft
+    \pl@zakonczenie\par
+    \ifx\pl@podpispodpowiedz\@empty\else
+      \vspace{0.35em}%
+      {\footnotesize\itshape\pl@podpispodpowiedz\par}%
+    \fi
+    \vspace{\pl@signtolinegap}%
+    \rule{\pl@signwidth}{0.4pt}\par
+    \vspace{\pl@linetonamegap}%
+    {\bfseries\pl@podpis}\par
+    \ifx\pl@funkcja\@empty\else
+      \vspace{0.25em}%
+      {\small\pl@funkcja}\par
+    \fi
+  \end{minipage}%
+}
+
+\endinput

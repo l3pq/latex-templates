@@ -1,0 +1,64 @@
+% Example: Polish official letter -- package pl-official-letter
+% Build (from repo root, TEXINPUTS points at templates/):
+%   TEXINPUTS=./templates//: latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=out examples/official-letter-example.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage{pl-official-letter}
+% Optional: how much lower the sender starts vs. place line (default 2.6em)
+% \plnadawcatopgap{3.2em}
+% Space between address block and subject title (default 2.75em)
+% \plheadtotitlespace{3.25em}
+% Address block column widths (defaults: left 0.46, right 0.48 \textwidth)
+% \plleftcolwidth{0.47\textwidth}
+% \plrightcolwidth{0.47\textwidth}
+% Gap from date line to recipient (right column)
+% \plsendertorecipient{1.4em}
+
+% PDF metadata (optional)
+\plpdftitle{Przykładowy wniosek do urzędu}
+\plpdfauthor{Jan Kowalski}
+
+\begin{document}
+
+% --- Sender (multi-line: \\) ---
+\plnadawca{%
+  Jan Kowalski\\
+  ul. Przykładowa 1 m. 2\\
+  00-001 Warszawa%
+}
+
+% --- Recipient: in PDF on the right, under place and date ---
+\pladresat{%
+  Urząd Gminy Przykład\\
+  Wydział Spraw Obywatelskich\\
+  ul. Urzędowa 10\\
+  00-999 Przykładowo%
+}
+
+% --- Place + date (omit word "dnia" and "r." -- the template adds them) ---
+\plmiejscodata{Warszawa}{16 kwietnia 2026}
+% Alternatively: \plmiejscowosc{...} and \pldata{...}
+
+% --- Subject title (centered, bold) ---
+\pltytul{Wniosek o zmianę adresu zameldowania na pobyt stały}
+
+% --- Optional: case reference / scope (remove entire \plsprawa{} line if unused) ---
+\plsprawa{znak sprawy URG-WSC/123/2026}
+
+% --- Salutation (package default unless overridden with \plzwrot{...}) ---
+% \plzwrot{Szanowny Panie Burmistrzu,}
+% Optional hint marking the handwritten signature area:
+% \plpodpowiedzpodpisu{(handwritten signature)}
+
+\makeletterhead
+
+W związku z nabyciem prawa do lokalu mieszkalnego przy ul. Nowej 5 w Przykładowie zwracam się z prośbą o dokonanie wpisu zmiany adresu zameldowania na pobyt stały.
+
+Do wniosku dołączam wymagane prawem załączniki. Proszę o rozpatrzenie sprawy w terminie określonym przepisami.
+
+\plpodpis{Jan Kowalski}
+% Optional line under the name:
+% \plfunkcja{handwritten signature}
+
+\makelettersignature
+
+\end{document}
